@@ -3,19 +3,17 @@
 
 import os
 
-
 class DatasetCatalog(object):
     DATA_DIR = "datasets"
 
     DATASETS = {
-        "coco_2014_train": (
-            "coco/train2014",
-            "coco/annotations/instances_train2014.json",
+        "coco_rsna_train_2018": (
+            "rsna/train/",
+            "rsna/annotations/rsna_train_2018.json",
         ),
-        "coco_2014_val": ("coco/val2014", "coco/annotations/instances_val2014.json"),
-        "coco_2014_minival": (
-            "coco/val2014",
-            "coco/annotations/instances_minival2014.json",
+        "coco_rsna_val_2018": (
+            "rsna/val/", 
+            "coco/annotations/rsna_val_2018.json",
         ),
         "coco_2014_valminusminival": (
             "coco/val2014",
