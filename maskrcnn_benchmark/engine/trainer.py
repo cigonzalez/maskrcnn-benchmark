@@ -114,6 +114,7 @@ def do_train(
                 )
             )
         if iteration % checkpoint_period == 0 and iteration > 0:
+            checkpointer.save("model_{:07d}".format(iteration), **arguments)
             fig = plt.figure()
             for key in loss_dict_reduced.keys():
                 exec('{key}.append(loss_dict_reduced["{key}"].item())'.format(key= key))
@@ -124,7 +125,7 @@ def do_train(
             plt.legend()
             fig.savefig(os.path.join(cfg.OUTPUT_DIR, "train_loss.png"))
             plt.close(fig)
-            checkpointer.save("model_{:07d}".format(iteration), **arguments)
+            
             #val(cfg, model, distributed)
             
 
