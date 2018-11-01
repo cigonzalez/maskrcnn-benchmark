@@ -125,7 +125,7 @@ def do_train(
             fig.savefig(os.path.join(cfg.OUTPUT_DIR, "train_loss.png"))
             plt.close(fig)
             checkpointer.save("model_{:07d}".format(iteration), **arguments)
-            val(cfg, model, distributed)
+            #val(cfg, model, distributed)
             
 
 
