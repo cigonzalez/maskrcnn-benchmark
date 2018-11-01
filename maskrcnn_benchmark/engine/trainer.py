@@ -97,6 +97,9 @@ def do_train(
         eta_seconds = meters.time.global_avg * (max_iter - iteration)
         eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
 
+        for key in loss_dict_reduced.keys():
+                exec('{key}.append(loss_dict_reduced["{key}"].item())'.format(key= key))
+
         if iteration % 20 == 0 or iteration == (max_iter - 1):
             logger.info(
                 meters.delimiter.join(
@@ -117,7 +120,6 @@ def do_train(
             )
             fig = plt.figure()
             for key in loss_dict_reduced.keys():
-                exec('{key}.append(loss_dict_reduced["{key}"].item())'.format(key= key))
                 exec('plt.plot({key}, label="{key}")'.format(key=key))
             plt.title('Train')
             plt.xlabel('Epoch')
