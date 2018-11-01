@@ -2,12 +2,16 @@
 import datetime
 import logging
 import time
+import os
+import matplotlib.pyplot as plt
+
 
 import torch
 from torch.distributed import deprecated as dist
 
 from maskrcnn_benchmark.utils.comm import get_world_size
 from maskrcnn_benchmark.utils.metric_logger import MetricLogger
+from maskrcnn_benchmark.engine.inference import inference
 
 
 def reduce_loss_dict(loss_dict):
@@ -36,6 +40,7 @@ def reduce_loss_dict(loss_dict):
 
 
 def do_train(
+    cfg,
     model,
     data_loader,
     optimizer,
@@ -44,6 +49,7 @@ def do_train(
     device,
     checkpoint_period,
     arguments,
+    distributed,
 ):
     logger = logging.getLogger("maskrcnn_benchmark.trainer")
     logger.info("Start training")
@@ -53,6 +59,11 @@ def do_train(
     model.train()
     start_training_time = time.time()
     end = time.time()
+    loss_classifier  = []
+    loss_box_reg = []
+    loss_objectness = [] 
+    loss_rpn_box_reg = []
+
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         data_time = time.time() - end
         arguments["iteration"] = iteration
@@ -69,7 +80,7 @@ def do_train(
         # reduce losses over all GPUs for logging purposes
         loss_dict_reduced = reduce_loss_dict(loss_dict)
         losses_reduced = sum(loss for loss in loss_dict_reduced.values())
-        meters.update(loss=losses_reduced, **loss_dict_reduced)
+        meters.update(loss=losses_reduced, **loss_dict_reduced)  
 
         optimizer.zero_grad()
         losses.backward()
@@ -101,7 +112,20 @@ def do_train(
                 )
             )
         if iteration % checkpoint_period == 0 and iteration > 0:
+            fig = plt.figure()
+            for key in loss_dict_reduced.keys():
+                exec('{key}.append(loss_dict_reduced["{key}"].item())'.format(key= key))
+                exec('plt.plot({key}, label="{key}")'.format(key=key))
+            plt.title('Train')
+            plt.xlabel('Epoch')
+            plt.ylabel('Loss')
+            plt.legend()
+            fig.savefig(os.path.join(cfg.OUTPUT_DIR, "train_loss.png"))
+            plt.close(fig)
             checkpointer.save("model_{:07d}".format(iteration), **arguments)
+            val(cfg, model, distributed)
+            
+
 
     checkpointer.save("model_{:07d}".format(iteration), **arguments)
     total_training_time = time.time() - start_training_time
@@ -111,3 +135,31 @@ def do_train(
             total_time_str, total_training_time / (max_iter)
         )
     )
+
+def val(cfg, model, distributed):
+    if distributed:
+        model = model.module
+    torch.cuda.empty_cache()  # TODO check if it helps
+    iou_types = ("bbox",)
+    if cfg.MODEL.MASK_ON:
+        iou_types = iou_types + ("segm",)
+    output_folders = [None] * len(cfg.DATASETS.TEST)
+    if cfg.OUTPUT_DIR:
+        dataset_names = cfg.DATASETS.TEST
+        for idx, dataset_name in enumerate(dataset_names):
+            output_folder = os.path.join(cfg.OUTPUT_DIR, "inference", dataset_name)
+            mkdir(output_folder)
+            output_folders[idx] = output_folder
+    data_loaders_val = make_data_loader(cfg, is_train=False, is_distributed=distributed)
+    for output_folder, data_loader_val in zip(output_folders, data_loaders_val):
+        inference(
+            model,
+            data_loader_val,
+            iou_types=iou_types,
+            box_only=cfg.MODEL.RPN_ONLY,
+            device=cfg.MODEL.DEVICE,
+            expected_results=cfg.TEST.EXPECTED_RESULTS,
+            expected_results_sigma_tol=cfg.TEST.EXPECTED_RESULTS_SIGMA_TOL,
+            output_folder=output_folder,
+        )
+        synchronize()
