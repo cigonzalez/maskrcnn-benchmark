@@ -1,6 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import datetime
 import logging
+import pickle
 import time
 import os
 import matplotlib
@@ -62,10 +63,10 @@ def do_train(
     model.train()
     start_training_time = time.time()
     end = time.time()
-    loss_classifier  = []
-    loss_box_reg = []
-    loss_objectness = [] 
-    loss_rpn_box_reg = []
+    loss_classifier  = pickle.load(open('loss_classifier.p', 'rb'))
+    loss_box_reg = pickle.load(open('loss_box_reg.p', 'rb'))
+    loss_objectness = pickle.load(open('loss_objectness.p', 'rb'))
+    loss_rpn_box_reg = pickle.load(open('loss_rpn_box_reg.p', 'rb'))
 
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         data_time = time.time() - end
@@ -98,7 +99,9 @@ def do_train(
         eta_string = str(datetime.timedelta(seconds=int(eta_seconds)))
 
         for key in loss_dict_reduced.keys():
-                exec('{key}.append(loss_dict_reduced["{key}"].item())'.format(key= key))
+                exec('{key}.append(loss_dict_reduced["{key}"].item())'.format(key=key))
+                exec('pickle.dump({key}, open("{key}.p", "wb"))'.format(key=key))
+
 
         if iteration % 20 == 0 or iteration == (max_iter - 1):
             logger.info(
@@ -118,15 +121,17 @@ def do_train(
                     memory=torch.cuda.max_memory_allocated() / 1024.0 / 1024.0,
                 )
             )
-            fig = plt.figure()
+            
             for key in loss_dict_reduced.keys():
+                fig = plt.figure()
                 exec('plt.plot({key}, label="{key}")'.format(key=key))
-            plt.title('Train')
-            plt.xlabel('Epoch')
-            plt.ylabel('Loss')
-            plt.legend()
-            fig.savefig(os.path.join(cfg.OUTPUT_DIR, "train_loss.png"))
-            plt.close(fig)
+                plt.title('Train')
+                plt.xlabel('Epoch')
+                plt.ylabel('Loss')
+                plt.legend()
+                fig.savefig(os.path.join(cfg.OUTPUT_DIR, "train_loss.png"))
+                plt.close(fig)
+            
         if iteration % checkpoint_period == 0 and iteration > 0:
             checkpointer.save("model_{:07d}".format(iteration), **arguments)
             val(cfg, model, distributed)
