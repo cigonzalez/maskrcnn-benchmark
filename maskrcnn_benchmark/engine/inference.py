@@ -5,6 +5,7 @@ import tempfile
 import time
 import os
 from collections import OrderedDict
+import pdb
 
 import torch
 
@@ -403,6 +404,8 @@ def inference(
             torch.save(res, os.path.join(output_folder, "box_proposals.pth"))
         return
     logger.info("Preparing results for COCO format")
+
+    pdb.set_trace()
     coco_results = {}
     if "bbox" in iou_types:
         logger.info("Preparing bbox results")
