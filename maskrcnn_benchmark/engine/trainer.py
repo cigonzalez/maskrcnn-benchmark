@@ -63,10 +63,16 @@ def do_train(
     model.train()
     start_training_time = time.time()
     end = time.time()
-    loss_classifier  = pickle.load(open('./outputs/loss_classifier.p', 'rb'))
-    loss_box_reg = pickle.load(open('./outputs/loss_box_reg.p', 'rb'))
-    loss_objectness = pickle.load(open('./outputs/loss_objectness.p', 'rb'))
-    loss_rpn_box_reg = pickle.load(open('./outputs/loss_rpn_box_reg.p', 'rb'))
+    try:
+        loss_classifier  = pickle.load(open('./outputs/loss_classifier.p', 'rb'))
+        loss_box_reg = pickle.load(open('./outputs/loss_box_reg.p', 'rb'))
+        loss_objectness = pickle.load(open('./outputs/loss_objectness.p', 'rb'))
+        loss_rpn_box_reg = pickle.load(open('./outputs/loss_rpn_box_reg.p', 'rb'))
+    except EOFError:
+        loss_classifier  = []
+        loss_box_reg = []
+        loss_objectness = []
+        loss_rpn_box_reg = []
 
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         data_time = time.time() - end
