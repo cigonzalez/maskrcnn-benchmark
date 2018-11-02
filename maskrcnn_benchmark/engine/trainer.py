@@ -6,7 +6,7 @@ import os
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
+import pdb
 
 import torch
 from torch.distributed import deprecated as dist
@@ -77,6 +77,7 @@ def do_train(
         images = images.to(device)
         targets = [target.to(device) for target in targets]
 
+        pdb.set_trace()
         loss_dict = model(images, targets)
 
         losses = sum(loss for loss in loss_dict.values())
