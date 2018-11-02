@@ -63,10 +63,10 @@ def do_train(
     model.train()
     start_training_time = time.time()
     end = time.time()
-    loss_classifier  = pickle.load(open('loss_classifier.p', 'rb'))
-    loss_box_reg = pickle.load(open('loss_box_reg.p', 'rb'))
-    loss_objectness = pickle.load(open('loss_objectness.p', 'rb'))
-    loss_rpn_box_reg = pickle.load(open('loss_rpn_box_reg.p', 'rb'))
+    loss_classifier  = pickle.load(open('./outputs/loss_classifier.p', 'rb'))
+    loss_box_reg = pickle.load(open('./outputs/loss_box_reg.p', 'rb'))
+    loss_objectness = pickle.load(open('./outputs/loss_objectness.p', 'rb'))
+    loss_rpn_box_reg = pickle.load(open('./outputs/loss_rpn_box_reg.p', 'rb'))
 
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
         data_time = time.time() - end
@@ -100,7 +100,7 @@ def do_train(
 
         for key in loss_dict_reduced.keys():
                 exec('{key}.append(loss_dict_reduced["{key}"].item())'.format(key=key))
-                exec('pickle.dump({key}, open("{key}.p", "wb"))'.format(key=key))
+                exec('pickle.dump({key}, open("./outputs/{key}.p", "wb"))'.format(key=key))
 
 
         if iteration % 20 == 0 or iteration == (max_iter - 1):
