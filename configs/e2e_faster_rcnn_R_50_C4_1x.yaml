@@ -16,4 +16,4 @@ SOLVER:
   CHECKPOINT_PERIOD: 2
 TEST:
   IMS_PER_BATCH: 2
-OUTPUT_DIR: ./outputs_test/
+OUTPUT_DIR: ./outputs/
