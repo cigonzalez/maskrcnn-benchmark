@@ -16,7 +16,7 @@ from maskrcnn_benchmark.utils.metric_logger import MetricLogger
 from maskrcnn_benchmark.utils.miscellaneous import mkdir
 from maskrcnn_benchmark.data import make_data_loader
 from maskrcnn_benchmark.engine.inference import inference
-
+from maskrcnn_benchmark.utils.comm import synchronize, get_rank
 
 def reduce_loss_dict(loss_dict):
     """
