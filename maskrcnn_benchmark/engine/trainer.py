@@ -129,7 +129,7 @@ def do_train(
             plt.close(fig)
         if iteration % checkpoint_period == 0 and iteration > 0:
             checkpointer.save("model_{:07d}".format(iteration), **arguments)
-            #val(cfg, model, distributed)
+            val(cfg, model, distributed)
             
 
 
