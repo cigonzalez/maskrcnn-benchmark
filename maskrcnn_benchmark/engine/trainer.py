@@ -129,7 +129,7 @@ def do_train(
                 plt.xlabel('Epoch')
                 plt.ylabel('Loss')
                 plt.legend()
-                fig.savefig(os.path.join(cfg.OUTPUT_DIR, "train_loss.png"))
+                fig.savefig(os.path.join(cfg.OUTPUT_DIR, "{key}.png".format(key=key)))
                 plt.close(fig)
             
         if iteration % checkpoint_period == 0 and iteration > 0:
