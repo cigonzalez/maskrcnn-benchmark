@@ -15,9 +15,9 @@ class DatasetCatalog(object):
             "rsna/val/", 
             "rsna/annotations/rsna_val_2018.json",
         ),
-        "coco_2014_valminusminival": (
-            "coco/val2014",
-            "coco/annotations/instances_valminusminival2014.json",
+        "coco_rsna_test_2018": (
+            "rsna/test/",
+            "rsna/annotations/rsna_test_2018.json",
         ),
     }
 
