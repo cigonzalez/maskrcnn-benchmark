@@ -66,9 +66,9 @@ def main():
     iou_types = ("bbox",)
     if cfg.MODEL.MASK_ON:
         iou_types = iou_types + ("segm",)
-    output_folders = [None] * len(cfg.DATASETS.TEST)
+    output_folders = [None] * len(cfg.DATASETS.TRAIN)
     if cfg.OUTPUT_DIR:
-        dataset_names = cfg.DATASETS.TEST
+        dataset_names = cfg.DATASETS.TRAIN
         for idx, dataset_name in enumerate(dataset_names):
             output_folder = os.path.join(cfg.OUTPUT_DIR, "inference", dataset_name)
             mkdir(output_folder)
